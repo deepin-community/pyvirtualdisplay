@@ -1,0 +1,12 @@
+pytest
+pillow
+types-pillow
+entrypoint2
+vncdotool==0.13.0
+psutil
+# for travis xenial
+attrs
+pytest-xdist
+mypy
+flake8
+EasyProcess
