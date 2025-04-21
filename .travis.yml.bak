@@ -1,0 +1,82 @@
+language: python
+
+matrix:
+  include:
+    - name: 3.6_trusty
+      python: 3.6
+      dist: trusty
+
+    - name: 3.6_xenial
+      python: 3.6
+      dist: xenial
+
+    - name: 3.7_xenial
+      python: 3.7
+      dist: xenial
+
+    - name: 3.8_xenial
+      python: 3.8
+      dist: xenial
+
+    - name: 3.7_bionic
+      python: 3.7
+      dist: bionic
+
+    - name: 3.8_bionic
+      python: 3.8
+      dist: bionic
+
+    - name: 3.8_focal
+      python: 3.8
+      dist: focal
+
+    - name: 3.9_focal
+      python: 3.9
+      dist: focal
+
+    - name: 3.9_focal_no_displayfd
+      python: 3.9
+      dist: focal
+      env:
+        - PYVIRTUALDISPLAY_DISPLAYFD=0
+
+    - name: "Python 3.7 on macOS"
+      os: osx
+      osx_image: xcode11.2 # Python 3.7.4 running on macOS 10.14.4
+      language: shell # 'language: python' is an error on Travis CI macOS
+      env: PATH=/Users/travis/Library/Python/3.7/bin:$PATH PIPUSER=--user
+
+    # - name: "Python 3.8 on Windows"
+    #   os: windows # Windows 10.0.17134 N/A Build 17134
+    #   language: shell # 'language: python' is an error on Travis CI Windows
+    #   before_install:
+    #     - choco install python --version 3.8
+    #     - python -m pip install --upgrade pip
+    #   env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
+
+addons:
+  apt:
+    packages:
+      - xvfb
+      - xserver-xephyr
+      - scrot
+      - gnumeric
+      - x11-utils
+      - x11-apps
+      - xfonts-base
+
+# vnc4server is later renamed to tigervnc-standalone-server
+install:
+  - if [ ${TRAVIS_OS_NAME} == "linux" ]; then sudo apt-get install -y vnc4server || true; fi
+  - if [ ${TRAVIS_OS_NAME} == "linux" ]; then sudo apt-get install -y tigervnc-standalone-server || true; fi
+  - PYTHON=python3
+  - if [ ${TRAVIS_OS_NAME} == "windows" ]; then PYTHON=python; fi
+  - $PYTHON -m pip install $PIPUSER --upgrade -r requirements-test.txt
+  - $PYTHON -m pip install $PIPUSER --upgrade .
+  # http://blog.tigerteufel.de/?p=476
+  - if [ ${TRAVIS_OS_NAME} == "osx" ]; then mkdir /tmp/.X11-unix;sudo chmod 1777 /tmp/.X11-unix;sudo chown root /tmp/.X11-unix/; fi
+
+script:
+  - cd tests
+  - $PYTHON -m pytest -v .
+
